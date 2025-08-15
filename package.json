@@ -1,0 +1,30 @@
+{
+  "name": "chat-with-me",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -r ts-node/register src/index.ts",
+    "ingest": "node -r ts-node/register src/ingest-worker.ts ./src/data/jesse.md",
+    "ingest:jesse": "tsx src/ingest-worker.ts ./src/data/jesse.md",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@browserbasehq/stagehand": "1.14.0",
+    "@langchain/community": "^0.3.50",
+    "@langchain/core": "^0.3.70",
+    "@langchain/ollama": "^0.2.3",
+    "@qdrant/js-client-rest": "^1.15.0",
+    "dotenv": "16.4.5",
+    "fastify": "^5.4.0",
+    "mercurius": "^16.2.0",
+    "uuid": "^11.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2"
+  }
+}

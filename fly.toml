@@ -1,0 +1,30 @@
+# fly.toml
+app = "chat-with-me-patient-pine-4381"
+primary_region = "sjc"
+
+# ───────── build ─────────
+[build]
+  dockerfile = "Dockerfile"      # use your custom Dockerfile
+  # image = "ollama/ollama:latest"   ← removed
+
+# ───────── runtime ─────────
+[[mounts]]
+  source      = "models"         # volume you created with `fly volumes create models --size 10`
+  destination = "/root/.ollama"  # where Ollama stores pulled models
+
+# [processes]
+#  app = "sh -c 'ollama serve & node index.js'"
+#  app = "node index.js"          # if CMD is already in Dockerfile you can drop this
+
+[http_service]
+  internal_port        = 3000    # Fastify listens on 3000
+  force_https          = true
+  auto_start_machines  = true
+  auto_stop_machines   = true
+  min_machines_running = 0
+  #processes            = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus     = 1
+  memory   = "2gb"               # 2 GB is safer for Ollama + Node (adjust as you like)

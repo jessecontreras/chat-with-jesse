@@ -1,0 +1,43 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  app:
+    build: .
+    container_name: chat-app
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      # Qdrant (cloud)
+      - QDRANT_URL=${QDRANT_URL}
+      - QDRANT_API_KEY=${QDRANT_API_KEY}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-chat_with_me}
+
+      # Ollama in docker network
+      - OLLAMA_BASE_URL=http://ollama:11434
+
+      # Models
+      - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}
+      - CHAT_MODEL=${CHAT_MODEL:-mistral:7b-instruct-q4_K_M}
+
+      # Retrieval config
+      - TOP_K=${TOP_K:-5}
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    command: ["node", "dist/index.js"]
+
+volumes:
+  ollama_models:
