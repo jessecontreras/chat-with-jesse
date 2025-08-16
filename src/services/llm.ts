@@ -25,7 +25,12 @@ export type LlmCaps = {
 const OLLAMA = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
 const CHAT_MODEL = process.env.CHAT_MODEL || "mistral:7b-instruct-q4_K_M";
 
-/** Convert your OpenAI-style messages into LangChain message objects. */
+/**
+ * Convert OpenAI-style messages into LangChain message objects.
+ *
+ * @param messages - Array of OpenAI-format messages.
+ * @returns Array of LangChain message instances.
+ */
 function toLcMessages(
   messages: Array<{ role: "system" | "user" | "assistant"; content: string }>
 ): BaseMessage[] {
@@ -41,7 +46,12 @@ function toLcMessages(
   });
 }
 
-/** Extract plain text from a LangChain AIMessage result. */
+/**
+ * Extract plain text from a LangChain AIMessage result.
+ *
+ * @param res - LangChain AIMessage or compatible object.
+ * @returns Trimmed text content.
+ */
 function toText(res: { content: unknown }): string {
   const c = (res as any).content;
   if (typeof c === "string") return c.trim();
@@ -60,8 +70,9 @@ function toText(res: { content: unknown }): string {
 /**
  * Chat via LangChain + Ollama and return the whole reply as a string.
  *
- * @param messages OpenAI-style messages (system/user/assistant).
- * @param caps     Controls temperature and length.
+ * @param messages - OpenAI-style messages (system/user/assistant).
+ * @param caps - Controls temperature and length.
+ * @returns Generated assistant reply.
  */
 export async function chatStream(
   messages: Array<{ role: "system" | "user" | "assistant"; content: string }>,

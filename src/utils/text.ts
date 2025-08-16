@@ -1,5 +1,5 @@
 /**
- * Split markdown for RAG.
+ * @file Utilities for splitting markdown into RAG-friendly chunks.
  * Each Q with its A is one chunk.
  * Each H2 or H3 defines a section anchor.
  * Long sections are soft wrapped with overlap.
@@ -15,10 +15,22 @@ export type RagChunk = {
 const MAX_CHARS = 3500; // about 900 tokens
 const OVERLAP = 200;
 
-function clean(s: string) {
+/**
+ * Trim trailing whitespace from lines and collapse blank lines.
+ *
+ * @param s - String to clean.
+ * @returns Cleaned string.
+ */
+function clean(s: string): string {
   return s.replace(/[ \t]+\n/g, "\n").trim();
 }
 
+/**
+ * Split a markdown document into overlapping RAG chunks.
+ *
+ * @param md - Markdown source text.
+ * @returns Array of chunk objects with section metadata.
+ */
 export function splitMarkdownForRAG(md: string): RagChunk[] {
   const lines = md.split("\n");
   const out: RagChunk[] = [];

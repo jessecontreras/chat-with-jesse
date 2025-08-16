@@ -14,7 +14,12 @@ import { LlmCaps } from "../services/llm.js";
 const OLLAMA = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
 const CHAT_MODEL = process.env.CHAT_MODEL || "mistral:7b-instruct-q4_K_M";
 
-/** Remove dataset-y labels or bullets the model might echo. */
+/**
+ * Remove dataset-y labels or bullets the model might echo.
+ *
+ * @param s - Raw model output.
+ * @returns Cleaned text string.
+ */
 function sanitize(s: string): string {
   return s
     .replace(
@@ -26,13 +31,25 @@ function sanitize(s: string): string {
     .trim();
 }
 
-/** Cap to N sentences. */
+/**
+ * Clamp text to the first N sentences.
+ *
+ * @param s - Input text.
+ * @param n - Maximum number of sentences to keep.
+ * @returns Truncated string.
+ */
 function firstNSentences(s: string, n: number): string {
   const parts = s.replace(/\s+/g, " ").split(/(?<=[.!?])\s/);
   return parts.slice(0, n).join(" ").trim();
 }
 
-/** Extract first JSON object from a string (tolerates extra prose). */
+/**
+ * Extract the first JSON object found in a string.
+ * Tolerates extra prose before or after the JSON.
+ *
+ * @param text - Source text possibly containing JSON.
+ * @returns Parsed object or `null` if none.
+ */
 function extractFirstJson(text: string): any | null {
   const m = text.match(/\{[\s\S]*\}/);
   if (!m) return null;
@@ -43,7 +60,12 @@ function extractFirstJson(text: string): any | null {
   }
 }
 
-/** Get plain text from an AIMessage-ish result. */
+/**
+ * Get plain text from an AIMessage-like result.
+ *
+ * @param res - LangChain AIMessage or similar object.
+ * @returns Extracted text content.
+ */
 function toText(res: any): string {
   const c = res?.content;
   if (typeof c === "string") return c;
@@ -60,9 +82,10 @@ function toText(res: any): string {
 /**
  * Generate a short, personable intro response with one follow-up question.
  *
- * @param userMessage The visitor's message (intro/hiring style).
- * @param systemPolicy Your base system content (values, boundaries, etc).
- * @param caps Length/temperature caps; numPredict is derived from max_tokens.
+ * @param userMessage - The visitor's message (intro/hiring style).
+ * @param systemPolicy - Base system content (values, boundaries, etc).
+ * @param caps - Length/temperature caps; numPredict derived from max_tokens.
+ * @returns Intro answer string.
  */
 export async function generateIntroAnswer(
   userMessage: string,
