@@ -10,12 +10,23 @@ export type Intent =
   | "deep_tech" // technical how/why questions
   | "hiring"; // recruiting / availability / rates
 
-/** Normalize input once. */
+/**
+ * Normalize input once for intent routing.
+ *
+ * @param s - String to normalize.
+ * @returns Lowercased and trimmed string.
+ */
 function norm(s: string): string {
   return (s || "").toLowerCase().trim();
 }
 
-/** Heuristics for each intent. Keep fast and readable. */
+/**
+ * Route a user message into a coarse intent.
+ * Keep heuristics fast and readable.
+ *
+ * @param message - Raw user message.
+ * @returns Predicted intent label.
+ */
 export function routeIntent(message: string): Intent {
   const m = norm(message);
 
@@ -62,7 +73,12 @@ export function routeIntent(message: string): Intent {
   return "small_talk";
 }
 
-/** Per-intent LLM and retrieval caps used by resolvers. */
+/**
+ * Per-intent LLM and retrieval caps used by resolvers.
+ *
+ * @param intent - Intent label from {@link routeIntent}.
+ * @returns Object with LLM caps and retrieval depth.
+ */
 export function intentParams(intent: Intent): {
   llm: { max_tokens: number; temperature: number };
   topK: number;
@@ -82,7 +98,12 @@ export function intentParams(intent: Intent): {
   }
 }
 
-/** Per-intent tone/constraints appended in the system prompt. */
+/**
+ * Per-intent tone and constraints appended in the system prompt.
+ *
+ * @param intent - Intent label from {@link routeIntent}.
+ * @returns Style guidance string.
+ */
 export function styleInstruction(intent: Intent): string {
   switch (intent) {
     case "profile_basic":

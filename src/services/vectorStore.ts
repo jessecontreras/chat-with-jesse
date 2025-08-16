@@ -1,5 +1,5 @@
 /**
- * Qdrant vector store helpers for search.
+ * @file Qdrant vector store helpers for semantic search.
  * Works with your existing embed wrapper and envs.
  */
 
@@ -10,19 +10,30 @@ import { embed } from "./embeddings.js";
 let client: QdrantClient | null = null;
 let collection = process.env.QDRANT_COLLECTION || "chat_with_me";
 
-export function initVectorStore(url: string, apiKey: string) {
+/**
+ * Initialize the Qdrant client used by search helpers.
+ *
+ * @param url - Base URL of the Qdrant instance.
+ * @param apiKey - API key for the Qdrant instance.
+ */
+export function initVectorStore(url: string, apiKey: string): void {
   if (!client) client = new QdrantClient({ url, apiKey });
   collection = process.env.QDRANT_COLLECTION || collection;
 }
 
 /**
  * Basic semantic search with payload return.
- * No score threshold. Recall is preferred at this layer.
+ * Recall is preferred over precision at this layer.
+ *
+ * @param opts - Search parameters.
+ * @param opts.query - Text to search for.
+ * @param opts.topK - Number of results to return.
+ * @returns Array of Qdrant search hits.
  */
 export async function search(opts: {
   query: string;
   topK: number;
-}): Promise<Array<any>> {
+}): Promise<any[]> {
   if (!client)
     throw new Error("Qdrant client not initialized. Call initVectorStore()");
 
@@ -54,10 +65,17 @@ export async function search(opts: {
   return Array.isArray(res) ? res : [];
 }
 
+/**
+ * Run multiple searches and return a deduplicated list of hits.
+ *
+ * @param queries - Queries to issue against the vector store.
+ * @param topK - Results per query.
+ * @returns Combined array of unique search hits.
+ */
 export async function searchMany(
   queries: string[],
   topK = 4
-): Promise<Array<any>> {
+): Promise<any[]> {
   const all: any[] = [];
   const seen = new Set<string>();
   for (const q of queries) {

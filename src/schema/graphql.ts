@@ -27,7 +27,11 @@ const schema = /* GraphQL */ `
 
 let __SYSTEM_CACHE__: string | null = null;
 
-/** Load system content and append answer policies if present. */
+/**
+ * Load system content and append answer policies if present.
+ *
+ * @returns Combined system prompt string.
+ */
 async function getSystemContent(): Promise<string> {
   if (__SYSTEM_CACHE__) return __SYSTEM_CACHE__;
 
@@ -63,7 +67,12 @@ async function getSystemContent(): Promise<string> {
   return __SYSTEM_CACHE__;
 }
 
-/** Remove dataset labels the model may echo (Prompt/Target/Q/A/Follow-up). */
+/**
+ * Remove dataset labels the model may echo (Prompt/Target/Q/A/Follow-up).
+ *
+ * @param s - Raw model output.
+ * @returns Sanitized output string.
+ */
 function sanitizeOutput(s: string): string {
   return s
     .replace(
@@ -74,12 +83,23 @@ function sanitizeOutput(s: string): string {
     .trim();
 }
 
-/** Return the first N sentences from a blob of text. */
+/**
+ * Return the first N sentences from a blob of text.
+ *
+ * @param s - Input text.
+ * @param n - Maximum number of sentences.
+ * @returns Truncated text containing at most N sentences.
+ */
 function firstNSentences(s: string, n: number): string {
   const parts = s.replace(/\s+/g, " ").split(/(?<=[.!?])\s/);
   return parts.slice(0, n).join(" ");
 }
 
+/**
+ * Create and configure the Fastify GraphQL application.
+ *
+ * @returns Configured Fastify instance.
+ */
 export async function createApp() {
   const app = Fastify({ logger: false });
   initVectorStore(process.env.QDRANT_URL!, process.env.QDRANT_API_KEY!);

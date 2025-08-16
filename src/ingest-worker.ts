@@ -31,10 +31,19 @@ const EMBEDDING_DIM = Number(process.env.EMBEDDING_DIM || 768);
 const qdrant = new QdrantClient({ url: QDRANT_URL, apiKey: QDRANT_API_KEY });
 const UUID_NS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
 
+/**
+ * Compute a SHA-256 hex hash of a string.
+ *
+ * @param s - String to hash.
+ * @returns Hex digest of the hash.
+ */
 function sha256(s: string): string {
   return createHash("sha256").update(s).digest("hex");
 }
 
+/**
+ * Ensure the target Qdrant collection exists, creating it if needed.
+ */
 async function ensureCollection(): Promise<void> {
   try {
     await qdrant.getCollection(COLLECTION);
@@ -46,6 +55,12 @@ async function ensureCollection(): Promise<void> {
   }
 }
 
+/**
+ * Embed a batch of texts concurrently using Ollama.
+ *
+ * @param texts - Text strings to embed.
+ * @returns Array of embedding vectors.
+ */
 async function embedBatch(texts: string[]): Promise<number[][]> {
   const P = 6;
   const results: number[][] = new Array(texts.length);
@@ -77,6 +92,13 @@ async function embedBatch(texts: string[]): Promise<number[][]> {
   return results;
 }
 
+/**
+ * Upsert a batch of vectors and payloads into Qdrant.
+ *
+ * @param docId - Logical document identifier.
+ * @param chunks - Chunk metadata array.
+ * @param vectors - Corresponding embedding vectors.
+ */
 async function upsertBatch(
   docId: string,
   chunks: RagChunk[],
@@ -107,6 +129,12 @@ async function upsertBatch(
   });
 }
 
+/**
+ * Ingest a markdown file into Qdrant by embedding and upserting chunks.
+ *
+ * @param path - Path to the markdown file.
+ * @param docId - Optional logical document id (defaults to path).
+ */
 export async function ingestFile(path: string, docId = path): Promise<void> {
   await ensureCollection();
 

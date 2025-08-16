@@ -1,11 +1,16 @@
 /**
- * Retrieval policy utilities.
+ * @file Retrieval policy utilities.
  * Adds light rerank using section and question payloads when present.
  */
 
 import { search, searchMany } from "../services/vectorStore";
 
-/** Detect if user wants a personal fact. */
+/**
+ * Detect if the user is asking for personal facts.
+ *
+ * @param message - User message.
+ * @returns `true` when the text implies a personal fact request.
+ */
 function wantsPersonalFacts(message: string): boolean {
   const m = (message || "").toLowerCase();
   return (
@@ -32,13 +37,23 @@ const PERSONAL_NOUNS = [
   "meal",
 ];
 
-/** Pull candidate keywords from the message. */
+/**
+ * Pull candidate personal keywords from the message.
+ *
+ * @param message - User message.
+ * @returns Array of keywords appearing in the message.
+ */
 function derivePersonalKeywords(message: string): string[] {
   const m = (message || "").toLowerCase();
   return PERSONAL_NOUNS.filter((n) => m.includes(n));
 }
 
-/** Default filter to drop personal noise for tech asks. */
+/**
+ * Default filter to drop personal trivia for technical questions.
+ *
+ * @param line - Text line from a document.
+ * @returns `true` if the line is considered personal noise.
+ */
 function isPersonalNoiseLine(line: string): boolean {
   return (
     /\bFavorite\s+(band|dog|music|color|teams?)\b/i.test(line) ||
@@ -47,7 +62,13 @@ function isPersonalNoiseLine(line: string): boolean {
   );
 }
 
-/** Prefer lines that look like specific favorite facts. */
+/**
+ * Extract lines that appear to contain specific favorite facts.
+ *
+ * @param text - Text blob to scan.
+ * @param keywords - Candidate personal keywords.
+ * @returns Array of lines mentioning favorites.
+ */
 function extractFavoriteLines(text: string, keywords: string[]): string[] {
   const lines = text
     .split(/\r?\n/)
@@ -65,7 +86,12 @@ function extractFavoriteLines(text: string, keywords: string[]): string[] {
   return hits;
 }
 
-/** Deduplicate while preserving order. */
+/**
+ * Deduplicate values while preserving their original order.
+ *
+ * @param arr - Array of values.
+ * @returns Array with duplicates removed.
+ */
 function uniq<T>(arr: T[]): T[] {
   const seen = new Set<string>();
   const out: T[] = [];
@@ -81,7 +107,11 @@ function uniq<T>(arr: T[]): T[] {
 
 /**
  * Build a context block by retrieving topK snippets for the user message.
- * Light rerank will boost exact matches on payload.question and section intent.
+ * Light rerank boosts exact matches on payload.question and section intent.
+ *
+ * @param message - User message to ground against.
+ * @param topK - Number of snippets to retrieve.
+ * @returns Combined context string.
  */
 export async function buildContext(
   message: string,
