@@ -19,6 +19,7 @@ let collection = process.env.QDRANT_COLLECTION || "chat_with_me";
 export function initVectorStore(url: string, apiKey: string): void {
   if (!client) client = new QdrantClient({ url, apiKey });
   collection = process.env.QDRANT_COLLECTION || collection;
+  console.log(`Using Qdrant collection: ${collection}`);
 }
 
 /**
