@@ -76,7 +76,7 @@ async function getSystemContent(): Promise<string> {
 function sanitizeOutput(s: string): string {
   return s
     .replace(
-      /^\s*\*{0,2}\s*(Prompt|Question|Target|Answer|Q|A|Follow[-\s]?up)\s*\*{0,2}\s*[:：]\s*/gim,
+      /^\s*\*{0,2}\s*(Prompt|Question|Target|Q|A|Follow[-\s]?up)\s*\*{0,2}\s*[:：]\s*/gim,
       ""
     )
     .replace(/^\s*[-•]\s*/gm, "")
@@ -148,6 +148,8 @@ export async function createApp() {
         const finalText = isShortIntent(intent)
           ? firstNSentences(stripped, 3)
           : stripped;
+
+        console.log({ raw, stripped, finalText });
 
         return finalText || "I don’t know.";
       },
