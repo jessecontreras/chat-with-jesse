@@ -131,13 +131,11 @@ export async function createApp() {
 
         // 5) Messages for other intents
         const messages = [
-          { role: "system", content: sys },
           {
-            role: "user",
-            content: ctx
-              ? `Use only the context to answer. If it is not in the context, say I don’t know.\n\nContext:\n${ctx}\n\nQuestion:\n${message}`
-              : message,
+            role: "system",
+            content: ctx ? `${sys}\n\nContext:\n${ctx}` : sys,
           },
+          { role: "user", content: message },
         ] as const;
 
         // 6) Model call
