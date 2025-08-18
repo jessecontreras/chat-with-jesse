@@ -12,8 +12,8 @@ export type RagChunk = {
   order: number;
 };
 
-const MAX_CHARS = 3500; // about 900 tokens
-const OVERLAP = 200;
+const MAX_CHARS = 1000; // about 250 tokens
+const OVERLAP = 100;
 
 /**
  * Trim trailing whitespace from lines and collapse blank lines.
