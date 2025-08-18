@@ -123,6 +123,7 @@ export async function buildContext(
   const keywords = derivePersonalKeywords(message);
 
   const primaryHits = await search({ query: message, topK });
+  let extraHits: any[] = [];
   const hits = primaryHits
     .map((h: any) => ({
       text: String(h?.payload?.text || ""),
@@ -163,14 +164,22 @@ export async function buildContext(
     } else {
       synQueries.push("favorite", "favourite");
     }
-    const moreHits = await searchMany(
+    extraHits = await searchMany(
       synQueries,
       Math.max(2, Math.floor(topK / 2))
     );
-    const moreTexts = moreHits
+    const moreTexts = extraHits
       .map((h: any) => String(h?.payload?.text || ""))
       .filter(Boolean);
     favored = uniq(moreTexts.flatMap((t) => extractFavoriteLines(t, keywords)));
+  }
+
+  const allHits = primaryHits.concat(extraHits);
+  if (allHits.length === 0) {
+    const collection = process.env.QDRANT_COLLECTION || "chat_with_me";
+    console.warn(
+      `Vector search returned no hits for "${message}" in collection "${collection}"`
+    );
   }
 
   if (personal && favored.length > 0) {
